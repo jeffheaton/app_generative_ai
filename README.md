@@ -1,4 +1,4 @@
-# T81 558:Applications of Generative Artificial Intelligence
+# T81 559:Applications of Generative Artificial Intelligence
 
 [Washington University in St. Louis](http://www.wustl.edu)
 
