@@ -1,0 +1,25 @@
+name: genai 
+channels:
+  - pytorch
+  - conda-forge
+dependencies:
+    - python=3.11
+    - pip
+    - pytorch 
+    - torchvision 
+    - jupyter
+    - scikit-learn
+    - scipy
+    - pandas
+    - matplotlib
+    - pillow
+    - tqdm
+    - requests
+    - h5py
+    - pyyaml
+    - flask
+    - langchain
+    - ipykernel
+    - pip:
+        - langchain-openai
+        
