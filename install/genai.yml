@@ -17,10 +17,15 @@ dependencies:
   - requests
   - h5py
   - pyyaml
-  - flask
   - langchain
+  - langchain-community
   - ipykernel
   - pypdf
   - chromadb
+  - pypdf
+  - datasets
+  - langchainhub
+  - sentence-transformers
   - pip:
       - langchain-openai
+      - pdfkit
