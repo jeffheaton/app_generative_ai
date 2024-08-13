@@ -4,7 +4,7 @@
 
 Instructor: [Jeff Heaton](https://sites.wustl.edu/jeffheaton/)
 
-- Section 1. Fall 2024, Tuesday, 6:00 PM, Location: TBD
+- Section 1. Fall 2024, Tuesday, 6:00 PM, Location: Lopata Hall / 202
 
 # Course Description
 
