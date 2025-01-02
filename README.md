@@ -22,7 +22,7 @@ Note: This course will require the purchase of up to $100 in OpenAI API credits 
 
 # Syllabus
 
-This [syllabus](https://data.heatonresearch.com/wustl/syllabus/jheaton-t81-559-fall-2024-syllabus.pdf) presents the expected class schedule, due dates, and reading assignments. Download current syllabus.
+This [syllabus](https://data.heatonresearch.com/wustl/syllabus/jheaton-t81-559-spring-2025-syllabus.pdf) presents the expected class schedule, due dates, and reading assignments. Download current syllabus.
 
 | Module                                                                       | Content                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
