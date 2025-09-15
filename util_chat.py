@@ -10,8 +10,12 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_core.chat_history import InMemoryChatMessageHistory
 from langchain_core.messages import (
-    AIMessage, HumanMessage, SystemMessage, BaseMessage,
-    messages_to_dict, messages_from_dict,
+    AIMessage,
+    HumanMessage,
+    SystemMessage,
+    BaseMessage,
+    messages_to_dict,
+    messages_from_dict,
 )
 from IPython.display import display_markdown
 
@@ -24,6 +28,7 @@ logger.addHandler(logging.NullHandler())
 # -----------------------------
 class BaseMessageStrategy:
     """Common base with a registry for polymorphic (de)serialization."""
+
     REGISTRY: Dict[str, Type["BaseMessageStrategy"]] = {}
 
     def __init__(self):
@@ -69,12 +74,14 @@ class BaseMessageStrategy:
         return {
             "strategy_name": self.strategy_name,
             "messages": messages_to_dict(self._backing.messages),
-            "config": {},         # subclasses may add fields
-            "internal_state": {}, # subclasses may add fields
+            "config": {},  # subclasses may add fields
+            "internal_state": {},  # subclasses may add fields
         }
 
     @classmethod
-    def _restore_messages(cls, inst: "BaseMessageStrategy", msg_state: List[Dict[str, Any]]) -> None:
+    def _restore_messages(
+        cls, inst: "BaseMessageStrategy", msg_state: List[Dict[str, Any]]
+    ) -> None:
         if not msg_state:
             return
         msgs = messages_from_dict(msg_state)
@@ -110,6 +117,7 @@ class BaseMessageStrategy:
 
 class PassthroughMessageStrategy(BaseMessageStrategy):
     """No trimming or summarization; returns full history."""
+
     @property
     def strategy_name(self) -> str:
         return "passthrough"
@@ -120,6 +128,7 @@ class FixedWindowMessageStrategy(BaseMessageStrategy):
     Hard-cap of `window` messages (optionally pin first System).
     Trims on write-path to enforce cap.
     """
+
     def __init__(self, window: int = 12, keep_system_first: bool = True):
         super().__init__()
         assert window > 0
@@ -131,11 +140,15 @@ class FixedWindowMessageStrategy(BaseMessageStrategy):
         if not msgs:
             return
 
-        first_sys = msgs[0] if self.keep_system_first and isinstance(msgs[0], SystemMessage) else None
+        first_sys = (
+            msgs[0]
+            if self.keep_system_first and isinstance(msgs[0], SystemMessage)
+            else None
+        )
         body = msgs[1:] if first_sys else msgs
 
         if len(body) > self.window:
-            body[:] = body[-self.window:]
+            body[:] = body[-self.window :]
 
         if first_sys:
             msgs[:] = [first_sys] + body
@@ -191,17 +204,20 @@ class SummarizingMessageStrategy(BaseMessageStrategy):
     Keeps a running summary of older turns and a verbatim recent tail.
     When `trigger_len` is exceeded, collapse older content into `_summary_text`.
     """
+
     def __init__(
         self,
         summarizer_llm: Optional[ChatOpenAI] = None,
         trigger_len: int = 20,
         keep_last: int = 10,
         max_summary_chars: int = 1200,
-        system_prefix: str = "Running summary"
+        system_prefix: str = "Running summary",
     ):
         super().__init__()
         assert trigger_len > 0 and keep_last > 0
-        self.summarizer_llm = summarizer_llm or ChatOpenAI(model="gpt-5-mini", temperature=0.0)
+        self.summarizer_llm = summarizer_llm or ChatOpenAI(
+            model="gpt-5-mini", temperature=0.0
+        )
         self.trigger_len = trigger_len
         self.keep_last = keep_last
         self.max_summary_chars = max_summary_chars
@@ -210,15 +226,21 @@ class SummarizingMessageStrategy(BaseMessageStrategy):
         self._last_summarized_idx: int = 0
 
     def _need_summarize(self) -> bool:
-        return len(self.backing_messages) - self._last_summarized_idx > max(self.keep_last, self.trigger_len)
+        return len(self.backing_messages) - self._last_summarized_idx > max(
+            self.keep_last, self.trigger_len
+        )
 
     def _build_summarization_input(self) -> List[BaseMessage]:
         msgs = self.backing_messages
         head = msgs[: max(0, len(msgs) - self.keep_last)]
         prompt_msgs: List[BaseMessage] = []
         if self._summary_text:
-            prompt_msgs.append(SystemMessage(content=f"{self.system_prefix} so far:\n{self._summary_text}"))
-        prompt_msgs.extend(head[self._last_summarized_idx:])
+            prompt_msgs.append(
+                SystemMessage(
+                    content=f"{self.system_prefix} so far:\n{self._summary_text}"
+                )
+            )
+        prompt_msgs.extend(head[self._last_summarized_idx :])
         return prompt_msgs
 
     def _summarize_now(self) -> None:
@@ -227,14 +249,18 @@ class SummarizingMessageStrategy(BaseMessageStrategy):
             return
 
         prompt = [
-            SystemMessage(content=(
-                "You compress chat histories into factual, actionable bullets while "
-                "preserving entities, decisions, constraints, and examples."
-            )),
-            HumanMessage(content=(
-                f"Summarize the following context into 5–10 compact bullets (~{self.max_summary_chars} chars).\n"
-                "Return only the bullets.\n=== BEGIN CONTEXT ==="
-            ))
+            SystemMessage(
+                content=(
+                    "You compress chat histories into factual, actionable bullets while "
+                    "preserving entities, decisions, constraints, and examples."
+                )
+            ),
+            HumanMessage(
+                content=(
+                    f"Summarize the following context into 5–10 compact bullets (~{self.max_summary_chars} chars).\n"
+                    "Return only the bullets.\n=== BEGIN CONTEXT ==="
+                )
+            ),
         ]
         prompt.extend(to_collapse)
         prompt.append(HumanMessage(content="=== END CONTEXT ==="))
@@ -244,8 +270,12 @@ class SummarizingMessageStrategy(BaseMessageStrategy):
 
         if self._summary_text:
             merge_prompt = [
-                SystemMessage(content="Merge two bullet lists into one concise list without redundancy."),
-                HumanMessage(content=f"List A:\n{self._summary_text}\n\nList B:\n{new_summary}")
+                SystemMessage(
+                    content="Merge two bullet lists into one concise list without redundancy."
+                ),
+                HumanMessage(
+                    content=f"List A:\n{self._summary_text}\n\nList B:\n{new_summary}"
+                ),
             ]
             merged = self.summarizer_llm.invoke(merged_prompt := merge_prompt)
             self._summary_text = merged.content.strip()
@@ -258,9 +288,11 @@ class SummarizingMessageStrategy(BaseMessageStrategy):
     def messages(self) -> List[BaseMessage]:
         if self._need_summarize():
             self._summarize_now()
-        tail = self.backing_messages[-self.keep_last:] if self.keep_last > 0 else []
+        tail = self.backing_messages[-self.keep_last :] if self.keep_last > 0 else []
         if self._summary_text:
-            return [SystemMessage(content=f"{self.system_prefix}:\n{self._summary_text}")] + list(tail)
+            return [
+                SystemMessage(content=f"{self.system_prefix}:\n{self._summary_text}")
+            ] + list(tail)
         return list(tail)
 
     def get_summary_text(self) -> Optional[str]:
@@ -279,7 +311,8 @@ class SummarizingMessageStrategy(BaseMessageStrategy):
             "keep_last": self.keep_last,
             "max_summary_chars": self.max_summary_chars,
             "system_prefix": self.system_prefix,
-            "summarizer_model": getattr(self.summarizer_llm, "model_name", None) or "gpt-5-mini",
+            "summarizer_model": getattr(self.summarizer_llm, "model_name", None)
+            or "gpt-5-mini",
             "summarizer_temperature": getattr(self.summarizer_llm, "temperature", 0.0),
         }
         base["internal_state"] = {
@@ -293,7 +326,7 @@ class SummarizingMessageStrategy(BaseMessageStrategy):
         cfg = state.get("config", {})
         llm = ChatOpenAI(
             model=cfg.get("summarizer_model", "gpt-5-mini"),
-            temperature=cfg.get("summarizer_temperature", 0.0)
+            temperature=cfg.get("summarizer_temperature", 0.0),
         )
         inst = cls(
             summarizer_llm=llm,
@@ -311,8 +344,8 @@ class SummarizingMessageStrategy(BaseMessageStrategy):
 
 # ---- Register built-in strategies (add new ones here only) ----
 BaseMessageStrategy.register("passthrough", PassthroughMessageStrategy)
-BaseMessageStrategy.register("fixed",       FixedWindowMessageStrategy)
-BaseMessageStrategy.register("summary",     SummarizingMessageStrategy)
+BaseMessageStrategy.register("fixed", FixedWindowMessageStrategy)
+BaseMessageStrategy.register("summary", SummarizingMessageStrategy)
 
 
 class ChatConversation:
@@ -341,11 +374,13 @@ class ChatConversation:
         self._temperature = temperature
         self._system_prompt = system_prompt
 
-        prompt = ChatPromptTemplate.from_messages([
-            ("system", system_prompt.strip()),
-            MessagesPlaceholder(variable_name="history"),
-            ("human", "{input}")
-        ])
+        prompt = ChatPromptTemplate.from_messages(
+            [
+                ("system", system_prompt.strip()),
+                MessagesPlaceholder(variable_name="history"),
+                ("human", "{input}"),
+            ]
+        )
 
         llm = ChatOpenAI(model=model, temperature=temperature)
 
@@ -387,11 +422,13 @@ class ChatConversation:
         output = self.invoke(prompt)
         display_markdown("**AI:** ", raw=True)
         display_markdown(output.content, raw=True)
-	return output.content
+        return output.content
 
     # ---- Strategy helpers ----
     def _strategy_obj(self) -> BaseMessageStrategy:
-        return self._strategy_store.setdefault(self._session_id, PassthroughMessageStrategy())
+        return self._strategy_store.setdefault(
+            self._session_id, PassthroughMessageStrategy()
+        )
 
     def get_history(self) -> List[BaseMessage]:
         """Full backing history (untrimmed view)."""
@@ -413,7 +450,10 @@ class ChatConversation:
         # Recreate a fresh instance of the current strategy class
         cur = self._strategy_obj()
         self._strategy_store[self._session_id] = type(cur)()
-        logger.info("Cleared history and reset strategy instance for session_id=%s", self._session_id)
+        logger.info(
+            "Cleared history and reset strategy instance for session_id=%s",
+            self._session_id,
+        )
 
     @property
     def session_id(self) -> str:
@@ -432,7 +472,9 @@ class ChatConversation:
         """
         msgs = self.get_history()
         if not msgs:
-            logger.info("Undo requested but history is empty (session_id=%s).", self._session_id)
+            logger.info(
+                "Undo requested but history is empty (session_id=%s).", self._session_id
+            )
             return
 
         removed_ai = False
@@ -449,13 +491,24 @@ class ChatConversation:
             removed_human = True
 
         if removed_human and removed_ai:
-            logger.info("Undid last Human+AI interaction (session_id=%s).", self._session_id)
+            logger.info(
+                "Undid last Human+AI interaction (session_id=%s).", self._session_id
+            )
         elif removed_human:
-            logger.info("Undid last Human message (no AI reply yet) (session_id=%s).", self._session_id)
+            logger.info(
+                "Undid last Human message (no AI reply yet) (session_id=%s).",
+                self._session_id,
+            )
         elif removed_ai:
-            logger.info("Removed trailing AI message without preceding Human (session_id=%s).", self._session_id)
+            logger.info(
+                "Removed trailing AI message without preceding Human (session_id=%s).",
+                self._session_id,
+            )
         else:
-            logger.info("Undo found no trailing Human/AI to remove (session_id=%s).", self._session_id)
+            logger.info(
+                "Undo found no trailing Human/AI to remove (session_id=%s).",
+                self._session_id,
+            )
 
     def regenerate(self) -> None:
         """
@@ -467,16 +520,25 @@ class ChatConversation:
         """
         msgs = self.get_history()
         if not msgs:
-            logger.info("Regenerate requested but history is empty (session_id=%s).", self._session_id)
+            logger.info(
+                "Regenerate requested but history is empty (session_id=%s).",
+                self._session_id,
+            )
             return
 
         # Remove trailing AI so we don't keep prior wording
         if isinstance(msgs[-1], AIMessage):
             msgs.pop()
-            logger.info("Removed trailing AI before regenerate (session_id=%s).", self._session_id)
+            logger.info(
+                "Removed trailing AI before regenerate (session_id=%s).",
+                self._session_id,
+            )
 
         if not msgs:
-            logger.info("Cannot regenerate: no prior Human message (session_id=%s).", self._session_id)
+            logger.info(
+                "Cannot regenerate: no prior Human message (session_id=%s).",
+                self._session_id,
+            )
             return
 
         # Find and pop the most recent Human message
@@ -490,12 +552,18 @@ class ChatConversation:
                     idx = i
                     break
             if idx is None:
-                logger.info("Cannot regenerate: no Human message found in history (session_id=%s).", self._session_id)
+                logger.info(
+                    "Cannot regenerate: no Human message found in history (session_id=%s).",
+                    self._session_id,
+                )
                 return
             last_input = msgs[idx].content
             del msgs[idx:]  # remove from that Human onward to avoid duplicates
 
-        logger.info("Regenerating response for last Human message (session_id=%s).", self._session_id)
+        logger.info(
+            "Regenerating response for last Human message (session_id=%s).",
+            self._session_id,
+        )
         display_markdown("**Human (regenerated):** ", raw=True)
         display_markdown(last_input, raw=True)
         output = self.invoke(last_input)
@@ -516,10 +584,14 @@ class ChatConversation:
             "session_id": self._session_id,
             "strategy_state": st,
         }
-        Path(path).write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+        Path(path).write_text(
+            json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
         logger.info(
             "Saved conversation to %s (session_id=%s, strategy=%s).",
-            str(path), self._session_id, st.get("strategy_name")
+            str(path),
+            self._session_id,
+            st.get("strategy_name"),
         )
 
     def load(self, path: str | Path, *, into_current_session: bool = True) -> None:
@@ -532,7 +604,11 @@ class ChatConversation:
         strat_state = payload.get("strategy_state", {})
         new_strategy = BaseMessageStrategy.from_serialized(strat_state)
 
-        target_sid = self._session_id if into_current_session else (payload.get("session_id") or self._session_id)
+        target_sid = (
+            self._session_id
+            if into_current_session
+            else (payload.get("session_id") or self._session_id)
+        )
         old_sid = self._session_id
         if not into_current_session:
             self._session_id = target_sid
@@ -540,7 +616,8 @@ class ChatConversation:
         self._strategy_store[target_sid] = new_strategy
         logger.info(
             "Loaded strategy '%s' into session_id=%s (file session_id=%s; previous session_id=%s).",
-            strat_state.get("strategy_name"), target_sid, payload.get("session_id"), old_sid
+            strat_state.get("strategy_name"),
+            target_sid,
+            payload.get("session_id"),
+            old_sid,
         )
-
-
