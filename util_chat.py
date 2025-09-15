@@ -421,8 +421,9 @@ class ChatConversation:
         display_markdown(prompt, raw=True)
         output = self.invoke(prompt)
         display_markdown("**AI:** ", raw=True)
-        display_markdown(output.content, raw=True)
-        return output.content
+        ascii_output = output.content.encode("ascii", errors="ignore").decode()
+        display_markdown(ascii_output, raw=True)
+        return ascii_output
 
     # ---- Strategy helpers ----
     def _strategy_obj(self) -> BaseMessageStrategy:
