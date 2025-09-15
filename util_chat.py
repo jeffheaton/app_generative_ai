@@ -387,6 +387,7 @@ class ChatConversation:
         output = self.invoke(prompt)
         display_markdown("**AI:** ", raw=True)
         display_markdown(output.content, raw=True)
+	return output.content
 
     # ---- Strategy helpers ----
     def _strategy_obj(self) -> BaseMessageStrategy:
