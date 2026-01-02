@@ -5,7 +5,7 @@
 Instructor: [Jeff Heaton](https://sites.wustl.edu/jeffheaton/)
 
 - Section 1. Spring 2026, Wednesday, 6:00 PM  
-  Location: CUPPLES II, Room 00203
+  Location: LOUDERMAN, Room 00461
 
 # Course Description
 
