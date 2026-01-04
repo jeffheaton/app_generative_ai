@@ -23,7 +23,7 @@ As the course progresses, students will delve into sophisticated image generatio
 
 # Syllabus
 
-This [syllabus](https://data.heatonresearch.com/wustl/syllabus/jheaton-t81-559-spring-2026-syllabus.pdf) presents the expected class schedule, due dates, and reading assignments.
+This [syllabus](https://s3.us-east-1.amazonaws.com/data.heatonresearch.com/wustl/syllabus/syllabus-t81-559-current.pdf) presents the expected class schedule, due dates, and reading assignments.
 
 | Module                                                                         | Content                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
