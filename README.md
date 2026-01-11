@@ -9,7 +9,7 @@ Instructor: [Jeff Heaton](https://sites.wustl.edu/jeffheaton/)
 
 # Course Description
 
-This course covers the dynamic world of Generative Artificial Intelligence providing hands-on practical applications of Large Language Models (LLMs) and advanced text-to-image networks. Using Python as the primary tool, students will interact with OpenAI's models for both text and images. The course begins with a solid foundation in generative AI principles, moving swiftly into the utilization of LangChain for model-agnostic access and the management of prompts, indexes, chains, and agents. A significant focus is placed on the integration of the Retrieval-Augmented Generation (RAG) model with graph databases, unlocking new possibilities in AI applications.
+This course covers the dynamic world of Generative Artificial Intelligence, providing hands-on practical applications of Large Language Models (LLMs) and advanced text-to-image networks. Using Python as the primary tool, students will interact with OpenAI's text and image models. The course begins with a solid foundation in generative AI principles, then moves swiftly to using LangChain for model-agnostic access and the management of prompts, indexes, chains, and agents. A significant focus is on integrating the Retrieval-Augmented Generation (RAG) model with graph databases, unlocking new possibilities for AI applications.
 
 As the course progresses, students will delve into sophisticated image generation and augmentation techniques, including LoRA (Low-Rank Adaptation), and learn the art of fine-tuning generative neural networks for specific needs. The final part of the course is dedicated to mastering prompt engineering, a critical skill for optimizing the efficiency and creativity of AI outputs.
 
