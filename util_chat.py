@@ -216,7 +216,7 @@ class SummarizingMessageStrategy(BaseMessageStrategy):
         super().__init__()
         assert trigger_len > 0 and keep_last > 0
         self.summarizer_llm = summarizer_llm or ChatOpenAI(
-            model="gpt-5-mini", temperature=0.0
+            model="gpt-5.6-luna", temperature=0.0
         )
         self.trigger_len = trigger_len
         self.keep_last = keep_last
@@ -312,7 +312,7 @@ class SummarizingMessageStrategy(BaseMessageStrategy):
             "max_summary_chars": self.max_summary_chars,
             "system_prefix": self.system_prefix,
             "summarizer_model": getattr(self.summarizer_llm, "model_name", None)
-            or "gpt-5-mini",
+            or "gpt-5.6-luna",
             "summarizer_temperature": getattr(self.summarizer_llm, "temperature", 0.0),
         }
         base["internal_state"] = {
@@ -325,7 +325,7 @@ class SummarizingMessageStrategy(BaseMessageStrategy):
     def from_state(cls, state: Dict[str, Any]) -> "SummarizingMessageStrategy":
         cfg = state.get("config", {})
         llm = ChatOpenAI(
-            model=cfg.get("summarizer_model", "gpt-5-mini"),
+            model=cfg.get("summarizer_model", "gpt-5.6-luna"),
             temperature=cfg.get("summarizer_temperature", 0.0),
         )
         inst = cls(
@@ -359,7 +359,7 @@ class ChatConversation:
 
     def __init__(
         self,
-        model: str = "gpt-5-mini",
+        model: str = "gpt-5.6-luna",
         system_prompt: str = "You are a helpful assistant.",
         temperature: float = 0.3,
         session_id: Optional[str] = None,
